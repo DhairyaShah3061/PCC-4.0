@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Python Coding Challenge 4.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Ace Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/ext-language_tools.js"></script>
+
+    <!-- Skulpt for Python execution -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.1.0/skulpt.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.1.0/skulpt-stdlib.js"></script>
+
+    <style>
+        /* General Reset & Body Style */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background-color: #1e1e1e;
+            color: #d1d5db;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Navigation Bar */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            background-color: #252526;
+            padding: 10px 20px;
+            border-bottom: 1px solid #3c3c3c;
+        }
+        .navbar .brand {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* Main Content Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Left Panel: Problem Statement */
+        .left-panel {
+            width: 400px;
+            min-width: 300px;
+            max-width: 600px;
+            background-color: #252526;
+            padding: 20px;
+            overflow-y: auto;
+            resize: horizontal;
+            overflow: hidden;
+            border-right: 1px solid #3c3c3c;
+            transition: all 0.2s ease;
+        }
+        .left-panel h2 {
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 1.5rem;
+        }
+        .left-panel h3 {
+            margin: 20px 0 10px 0;
+            color: #cbd5e1;
+            font-size: 1.1rem;
+        }
+        .left-panel p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #d1d5db;
+            font-size: 0.95rem;
+        }
+        .left-panel code {
+            background-color: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+        .example {
+            background-color: #2d2d2d;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border-left: 3px solid #4a90e2;
+        }
+
+        /* Right Panel: Code Editor + Terminal */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #1e1e1e;
+            min-width: 0; /* Required for flex to work properly */
+        }
+
+        /* Editor Container */
+        .editor-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        #editor {
+            /* Ace Editor needs a width/height to fill the container */
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Editor Buttons */
+        .editor-buttons {
+            background-color: #252526;
+            padding: 10px 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            border-top: 1px solid #3c3c3c;
+        }
+        .run-btn, .submit-btn {
+            background-color: #0e639c;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .run-btn:hover, .submit-btn:hover {
+            background-color: #1177bb;
+        }
+        .run-btn:active, .submit-btn:active {
+            background-color: #0c4d7a;
+        }
+        .run-btn svg, .submit-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        /* Terminal Output Area */
+        .terminal-wrapper {
+            height: 180px;
+            background: #252526;
+            padding: 12px;
+            font-family: 'Consolas', monospace;
+            overflow-y: auto;
+            border-top: 1px solid #3c3c3c;
+        }
+        .terminal-wrapper pre {
+            margin: 0;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        .terminal-wrapper .error {
+            color: #f48771;
+        }
+        .terminal-wrapper .success {
+            color: #4ec9b0;
+        }
+
+        /* Resizer Handle */
+        .resizer {
+            width: 6px;
+            background-color: #2d2d2d;
+            cursor: col-resize;
+            transition: background-color 0.2s;
+        }
+        .resizer:hover {
+            background-color: #4a90e2;
+        }
+        .resizer.active {
+            background-color: #4a90e2;
+        }
+
+        /* Responsive for smaller screens */
+        @media screen and (max-width: 768px) {
+            .left-panel {
+                width: 100% !important;
+                max-width: none;
+                resize: none;
+                border-right: none;
+                border-bottom: 1px solid #3c3c3c;
+            }
+            .main-container {
+                flex-direction: column;
+            }
+            .resizer {
+                display: none;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a4a4a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5a5a5a;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navbar -->
+    <div class="navbar">
+        <div class="brand">Python Coding Challenge 4.0</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Panel: Problem Statement -->
+        <div class="left-panel" id="left-panel">
+            <h2>Two Sum</h2>
+            <p>
+                Given an array of integers <code>nums</code> and an integer <code>target</code>, 
+                return indices of the two numbers in <code>nums</code> such that they add up to <code>target</code>. 
+                You may assume that each input would have exactly one solution, and you may not use the same element twice.
+            </p>
+            
+            <h3>Examples:</h3>
+            <div class="example">
+                <p><strong>Input:</strong> nums = [2,7,11,15], target = 9</p>
+                <p><strong>Output:</strong> [0,1]</p>
+                <p><strong>Explanation:</strong> Because nums[0] + nums[1] == 9</p>
+            </div>
+            
+            <div class="example">
+                <p><strong>Input:</strong> nums = [3,2,4], target = 6</p>
+                <p><strong>Output:</strong> [1,2]</p>
+            </div>
+            
+            <h3>Constraints:</h3>
+            <ul style="list-style-type: none; padding-left: 5px;">
+                <li>• 2 ≤ nums.length ≤ 10<sup>4</sup></li>
+                <li>• -10<sup>9</sup> ≤ nums[i] ≤ 10<sup>9</sup></li>
+                <li>• -10<sup>9</sup> ≤ target ≤ 10<sup>9</sup></li>
+                <li>• Only one valid answer exists.</li>
+            </ul>
+        </div>
+
+        <!-- Resizer Handle -->
+        <div class="resizer" id="resizer"></div>
+
+        <!-- Right Panel: Code Editor + Terminal -->
+        <div class="right-panel">
+            <div class="editor-container">
+                <div id="editor"></div>
+            </div>
+
+            <!-- Bottom Buttons -->
+            <div class="editor-buttons">
+                <button class="run-btn" id="run-button">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    Run Code
+                </button>
+                <button class="submit-btn" id="submit-button">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                    Submit
+                </button>
+            </div>
+
+            <!-- Terminal Output -->
+            <div class="terminal-wrapper" id="terminal">
+                <pre>Output will appear here...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1) Initialize Ace Editor
+        const aceEditor = ace.edit("editor");
+        aceEditor.setTheme("ace/theme/monokai");
+        aceEditor.session.setMode("ace/mode/python");
+        aceEditor.setOptions({
+            fontSize: 14,
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            showPrintMargin: false
+        });
+
+        // 2) Load some default Python code
+        const defaultCode = `# Write your solution here:
+def two_sum(nums, target):
+    for i in range(len(nums)):
+        for j in range(i+1, len(nums)):
+            if nums[i] + nums[j] == target:
+                return [i, j]
+
+# Example usage:
+nums = [2, 7, 11, 15]
+target = 9
+result = two_sum(nums, target)
+print(result)`;
+
+        aceEditor.setValue(defaultCode, -1); // -1 = move cursor to start
+
+        // 3) Skulpt configuration and code execution
+        const terminal = document.getElementById("terminal");
+
+        function runPythonCode() {
+            const code = aceEditor.getValue();
+            terminal.innerHTML = '<pre>Running...</pre>';
+
+            Sk.configure({
+                output: function(text) {
+                    const pre = document.createElement('pre');
+                    pre.textContent = text;
+                    terminal.appendChild(pre);
+                    terminal.scrollTop = terminal.scrollHeight;
+                },
+                read: function(x) {
+                    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
+                        throw "File not found: " + x;
+                    }
+                    return Sk.builtinFiles["files"][x];
+                }
+            });
+
+            // Clear previous output and show "Running..."
+            terminal.innerHTML = '<pre>Running...</pre>';
+
+            Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code, true))
+                .then(() => {
+                    const success = document.createElement('pre');
+                    success.className = 'success';
+                    success.textContent = 'Execution finished successfully.';
+                    terminal.appendChild(success);
+                    terminal.scrollTop = terminal.scrollHeight;
+                })
+                .catch(err => {
+                    const error = document.createElement('pre');
+                    error.className = 'error';
+                    error.textContent = 'Error: ' + err.toString();
+                    terminal.appendChild(error);
+                    terminal.scrollTop = terminal.scrollHeight;
+                });
+        }
+
+        // 4) Hook up Run/Submit buttons
+        document.getElementById("run-button").addEventListener("click", runPythonCode);
+        document.getElementById("submit-button").addEventListener("click", () => {
+            // In a real app, you'd send code to the server for validation
+            // For now, just run it
+            runPythonCode();
+        });
+
+        // 5) Make the left panel resizable by dragging the handle
+        const leftPanel = document.getElementById("left-panel");
+        const resizer = document.getElementById("resizer");
+
+        resizer.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            document.body.style.cursor = 'col-resize';
+            resizer.classList.add('active');
+            
+            const startX = e.clientX;
+            const startWidth = leftPanel.offsetWidth;
+            
+            function onMouseMove(e) {
+                const newWidth = startWidth + e.clientX - startX;
+                // Constrain within min/max
+                if (newWidth >= 300 && newWidth <= 600) {
+                    leftPanel.style.width = newWidth + 'px';
+                }
+            }
+            
+            function onMouseUp() {
+                document.body.style.cursor = '';
+                resizer.classList.remove('active');
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+
+                // Once the panel is resized, force Ace Editor to re-render
+                aceEditor.resize();
+            }
+            
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+
+        // 6) Resize Ace Editor if the window size changes
+        window.addEventListener('resize', () => {
+            aceEditor.resize();
+        });
+    </script>
+</body>
+</html>
