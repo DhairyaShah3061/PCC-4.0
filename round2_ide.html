@@ -306,40 +306,52 @@
 
         // -- 3) Run Python code with Skulpt
         function runPythonCode() {
-            const code = aceEditor.getValue();
-            terminal.innerHTML = '<pre>Running...</pre>';
+    const code = aceEditor.getValue();
+    terminal.innerHTML = ''; // Clear terminal before running
+    
+    const runningMsg = document.createElement('pre');
+    runningMsg.textContent = 'Running...';
+    terminal.appendChild(runningMsg);
 
-            Sk.configure({
-                output: function(text) {
-                    const pre = document.createElement('pre');
-                    pre.textContent = text;
-                    terminal.appendChild(pre);
-                    terminal.scrollTop = terminal.scrollHeight;
-                },
-                read: function(x) {
-                    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
-                        throw "File not found: " + x;
-                    }
-                    return Sk.builtinFiles["files"][x];
-                }
-            });
+    if (typeof Sk === "undefined") {
+        const error = document.createElement('pre');
+        error.className = 'error';
+        error.textContent = 'Error: Skulpt is not loaded properly.';
+        terminal.appendChild(error);
+        return;
+    }
 
-            Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code, true))
-                .then(() => {
-                    const success = document.createElement('pre');
-                    success.className = 'success';
-                    success.textContent = 'Execution finished successfully.';
-                    terminal.appendChild(success);
-                    terminal.scrollTop = terminal.scrollHeight;
-                })
-                .catch(err => {
-                    const error = document.createElement('pre');
-                    error.className = 'error';
-                    error.textContent = 'Error: ' + err.toString();
-                    terminal.appendChild(error);
-                    terminal.scrollTop = terminal.scrollHeight;
-                });
+    Sk.configure({
+        output: function (text) {
+            const pre = document.createElement('pre');
+            pre.textContent = text;
+            terminal.appendChild(pre);
+            terminal.scrollTop = terminal.scrollHeight;
+        },
+        read: function (x) {
+            if (!Sk.builtinFiles || !Sk.builtinFiles["files"][x]) {
+                throw new Error("File not found: " + x);
+            }
+            return Sk.builtinFiles["files"][x];
         }
+    });
+
+    Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code, true))
+        .then(() => {
+            const success = document.createElement('pre');
+            success.className = 'success';
+            success.textContent = 'Execution finished successfully.';
+            terminal.appendChild(success);
+            terminal.scrollTop = terminal.scrollHeight;
+        })
+        .catch(err => {
+            const error = document.createElement('pre');
+            error.className = 'error';
+            error.textContent = 'Error: ' + err.toString();
+            terminal.appendChild(error);
+            terminal.scrollTop = terminal.scrollHeight;
+        });
+}
 
         // -- 4) Hook up the Run/Submit buttons
         document.getElementById("run-button").addEventListener("click", runPythonCode);
