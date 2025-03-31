@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Hacker Login Form</title>
+  <title>Retro Game Login</title>
   <link rel="stylesheet" href="./login.css">
-
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
-<!-- partial:index.partial.html -->
-<section>
-
+  <section>
+    
     <span></span>
     <span></span>
     <span></span>
@@ -270,31 +269,20 @@
     <span></span>
     <span></span>
     <span></span>
-
     <div class="signin">
       <div class="content">
-        <h2>Sign In</h2>
-        <div class="form">
-          <div class="inputBox">
-            <input type="text" required>
-            <i>Username</i>
-          </div>
-          <div class="inputBox">
-            <input type="password" required>
-            <i>Password</i>
-          </div>
-          <div class="links">
-            <a href="./vintage_index.html">Forgot Password</a>
-            <a href="./retro_blob.html">Signup</a>
-          </div>
-          <div class="inputBox">
-            <input type="submit" value="Login">
-          </div>
-        </div>
+        <h2>Let's Begin!!</h2>
+        <button class="google-btn" onclick="googleSignIn()">
+          Sign in with Google
+        </button>
       </div>
     </div>
   </section>
-<!-- partial -->
   
+  <script>
+    function googleSignIn() {
+      window.location.href = "https://accounts.google.com/signin"; // Replace with actual OAuth link
+    }
+  </script>
 </body>
 </html>
